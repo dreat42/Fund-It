@@ -1,0 +1,188 @@
+import React, {useState, useRef} from 'react';
+import {
+  View,
+  LogBox,
+  StyleSheet,
+  Text,
+  Image,
+  TouchableOpacity,
+  Animated,
+} from 'react-native';
+
+import {Card, CardMedia, CardContent} from 'material-bread';
+import RNUpiPayment from 'react-native-upi-payment';
+
+const Progress = ({step, steps, height}) => {
+  const [width, setWidth] = useState(0);
+  const animatedValue = useRef(new Animated.Value(-1000)).current;
+  const reactive = useRef(new Animated.Value(-1000)).current;
+
+  React.useEffect(() => {
+    Animated.timing(animatedValue, {
+      toValue: reactive,
+      duration: 300,
+      useNativeDriver: true,
+    }).start();
+  }, []);
+
+  React.useEffect(() => {
+    //-width + width * step/steps
+    reactive.setValue(-width + (width * step) / steps);
+  }, [step, width]);
+
+  return (
+    <View>
+      <Text style={{fontFamily: 'Menlo', color: 'rgba(0,0,0,1)'}}>
+        {step}/{steps}
+      </Text>
+      <View
+        onLayout={e => {
+          const newWidth = e.nativeEvent.layout.width;
+
+          setWidth(newWidth);
+        }}
+        style={{
+          height,
+          backgroundColor: 'rgba(255,255,255,1)',
+          borderRadius: height,
+          borderColor: 'rgba(0,0,0,0.8)',
+          borderWidth: 1.5,
+
+          overflow: 'hidden',
+          width: 200,
+        }}>
+        <Animated.View
+          style={{
+            height,
+            width: '100%',
+            borderRadius: height,
+            backgroundColor: '#05A6E5',
+            position: 'absolute',
+            left: 0,
+            top: 0,
+            transform: [{translateX: animatedValue}],
+          }}
+        />
+      </View>
+    </View>
+  );
+};
+
+const Cardscreen = ({
+  problem,
+  title,
+  images,
+  name,
+  fundraised,
+  fundrequired,
+}) => {
+  return (
+    <View
+      style={{
+        flexDirection: 'row',
+        alignItems: 'center',
+        marginTop: 15,
+        paddingLeft: 10,
+        paddingRight: 10,
+      }}>
+      <Card style={styles.Card}>
+        <CardMedia
+          style={{padding: 3}}
+          image={
+            <Image
+              style={{
+                width: '100%',
+                height: '100%',
+                alignSelf: 'center',
+                borderRadius: 7,
+              }}
+              source={{uri: `${images}`}}
+            />
+          }
+        />
+        <CardContent style={{fontSize: 16, padding: 10}}>
+          <Text
+            style={{
+              backgroundColor: 'red',
+              color: 'white',
+              alignSelf: 'flex-start',
+              borderRadius: 5,
+              paddingRight: 5,
+              paddingLeft: 5,
+              fontFamily: 'SF-Regular',
+              fontWeight: 'bold',
+            }}>
+            {name}
+          </Text>
+          <Text
+            style={{
+              color: 'rgba(0,0,0,1)',
+              fontSize: 19,
+              fontFamily: 'SF-Regular',
+              fontWeight: 'bold',
+
+              textAlign: 'left',
+              paddingTop: 5,
+            }}>
+            {title}
+          </Text>
+          <Text
+            style={{
+              color: 'rgba(0,0,0,0.7)',
+              fontSize: 17,
+              fontFamily: 'SF-Regular',
+              paddingTop: 5,
+
+              textAlign: 'left',
+            }}>
+            {problem}
+          </Text>
+
+          <View
+            style={{
+              flexDirection: 'row',
+              paddingTop: 25,
+              justifyContent: 'space-between',
+            }}>
+            <Progress
+              step={fundraised}
+              steps={fundrequired}
+              height={14}
+              style={styles.progressbar}
+            />
+            <TouchableOpacity style={styles.donate}>
+              <Text style={styles.text}>Donate</Text>
+            </TouchableOpacity>
+          </View>
+        </CardContent>
+      </Card>
+    </View>
+  );
+};
+
+const styles = StyleSheet.create({
+  Card: {
+    width: '100%',
+    height: '100%',
+    borderRadius: 7,
+    backgroundColor: 'white',
+  },
+  progressbar: {alignSelf: 'flex-start'},
+  donate: {
+    padding: 8,
+    borderRadius: 5,
+
+    backgroundColor: '#17943A',
+  },
+  text: {
+    fontSize: 22,
+    alignSelf: 'flex-start',
+
+    fontWeight: 'bold',
+    letterSpacing: 1,
+    color: 'white',
+    fontFamily: 'SF-Regular',
+  },
+});
+
+export default Cardscreen;
